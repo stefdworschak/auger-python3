@@ -139,8 +139,11 @@ class DefaultGenerator(Generator):
         # Adding condition to check if import already exists
         # and add it for classes which do not have explicitly
         # declared __init__ methods
-        if (code.__module__, typename) not in self.imports_:
-            self.add_import(code.__module__, typename)
+        try:
+            if (code.__module__, typename) not in self.imports_:
+                self.add_import(code.__module__, typename)
+        except AttributeError:
+            pass
         self.output_.append(indent(2) + '%s_instance = %s' % (typename.lower(), self.get_initializer(typename, code, init_args)))
 
     def get_initializer(self, typename, code=None, init_args=None):
