@@ -229,7 +229,8 @@ class DefaultGenerator(Generator):
             if function.calls:
                 mocks = self.get_mocks(function)
                 self.dump_mock_decorators(mocks)
-                self.output_.append(indent(1) + 'def test_%s(self%s):' % (runtime.get_code_name(code), self.get_mock_args(mocks)))
+                class_name = self.get_class_from_method(function)
+                self.output_.append(indent(1) + 'def test_%s%s(self%s):' % (class_name, runtime.get_code_name(code), self.get_mock_args(mocks)))
                 self.dump_mock_return_values(mocks)
                 try:
                     self.dump_call(filename, code, list(function.calls.values()).pop())
@@ -292,4 +293,13 @@ class DefaultGenerator(Generator):
         value = DefaultGenerator.get_full_class_name(value) if DefaultGenerator.is_object(value) else repr(value)
         return value.replace("<type '", '').replace("'>", '')
 
-
+    @staticmethod
+    def get_class_from_method(function):
+        try:
+            for clazz in list(function.calls.values()).pop()[0][0].values():
+                return type(clazz).__name__.lower() + '_'
+        except KeyError:
+            pass
+        except IndexError:
+            pass
+        return ''
